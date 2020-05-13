@@ -1,27 +1,156 @@
-import React from 'react';
+import React, { Component } from 'react';
 import
 {
     Card, CardImg, CardText, CardBody,
-    CardTitle, Breadcrumb, BreadcrumbItem
+    CardTitle, Breadcrumb, BreadcrumbItem, Button,
+    Modal, ModalHeader, ModalBody,
+    Label, Col, Row
 } from 'reactstrap';
+import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Link } from 'react-router-dom';
 
 
 
+
+class CommentForm extends Component
+{
+
+    constructor(props)
+    {
+        super(props)
+
+        this.state = {
+            isModalOpen: false
+        }
+        this.toggleModal = this.toggleModal.bind(this);
+    }
+
+    toggleModal()
+    {
+        this.setState({
+            isModalOpen: !this.state.isModalOpen
+        })
+    }
+
+    handleSubmit(values)
+    {
+        console.log('Current State is: ' + JSON.stringify(values));
+        alert('Current State is: ' + JSON.stringify(values));
+
+    }
+
+
+
+
+    render()
+    {   const selectaValue = (val) => val !== "Select a value...";
+        const required = (val) => val && val.length;
+        const maxLength = (len) => (val) => !(val) || (val.length <= len);
+        const minLength = (len) => (val) => val && (val.length >= len);
+        return (
+            <div>
+                <Button onClick={this.toggleModal} className="btn-outline-secondary">
+                    <i className="fa fa-pencil fa-large" />
+                    Submit Comment</Button>
+                <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
+                    <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
+                    <ModalBody>
+                        <LocalForm onSubmit={(values) => this.handleSubmit(values)}>
+                            <Row className="form-group">
+                                <Label htmlFor="rating" xs={{ size: 12 }}>Rating</Label>
+                                <Col xm={12}>
+                                    <Control.select model=".rating" type="select" name="select" className="form-control"
+                                    validators={{
+                                        selectaValue,
+                                        required
+                                    }}
+                                    >
+                                        <option>Select a value...</option>
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                    </Control.select>
+                                    <Errors
+                                        className="text-danger"
+                                        model=".rating"
+                                        show="touched"
+                                        messages={{
+                                          selectaValue :"Must pick an option",  
+                                          required : "Must pick an option"
+                                        }}
+                                    />
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Label htmlFor="lastname" xs={12}>Your Name</Label>
+                                <Col xs={12}>
+                                    <Control.text model=".fullname" id="fullname" name="fullname"
+                                        placeholder="Your Name"
+                                        className="form-control"
+                                        validators={{
+                                            required, minLength: minLength(3), maxLength: maxLength(15)
+                                        }}
+                                    />
+                                    <Errors
+                                        className="text-danger"
+                                        model=".fullname"
+                                        show="touched"
+                                        messages={{
+                                            required: 'Required ',
+                                            minLength: 'Must be greater than 2 characters',
+                                            maxLength: 'Must be 15 characters or less'
+                                        }}
+                                    />
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Label htmlFor="message" xs={12}>Comment</Label>
+                                <Col xm={12}>
+                                    <Control.textarea model=".comment" id="comment" name="comment"
+                                        rows="6"
+                                        className="form-control" />
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Col sm={{ size: 12 }}>
+                                    <Button type="submit" color="primary">
+                                        Submit
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </LocalForm>
+
+                    </ModalBody>
+                </Modal>
+
+            </div>
+        )
+    }
+}
 
 function RenderComments({ comments })
 {
     const commentsList = comments.map((com) =>
     {
         return (
-            <ul class="list-unstyled" key={com.id}>
-                <li>  {com.comment}</li>
-                <li>-- {com.author}</li>
-                <li>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date(Date.parse(com.date)))}</li>
-            </ul>
+            <div>
+                <ul class="list-unstyled" key={com.id}>
+                    <li>  {com.comment}</li>
+                    <li>-- {com.author}</li>
+                    <li>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date(Date.parse(com.date)))}</li>
+                </ul>
+
+            </div>
         )
     });
-    return commentsList;
+    return (
+        <div>
+            {commentsList}
+            <CommentForm />
+        </div>)
+
 }
 
 function RenderDish({ dish })
@@ -64,12 +193,16 @@ const DishDetail = (props) =>
                 <div className="col-12 col-md-5 m-1">
                     <h4>Comments</h4>
                     <RenderComments comments={props.comments} />
+
                 </div>
             </div>
         </div>
     );
 
 }
+
+
+
 
 
 
